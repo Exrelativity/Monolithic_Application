@@ -1,1 +1,26 @@
-language: node_js
+language: nodejs
+  - 17
+  - 18
+  - 19
+
+branches: 
+  only:
+  - main
+  - stable
+
+services:
+  - docker
+before_install:
+  - echo -e "machine github.com\n login $GITHUB_TOKEN"> ~/ .netrc
+  - docker build ./udagram-api-feed -t  exrelativity/udagram-api-feed:v1
+  - docker build ./udagram-api-user -t  exrelativity/udagram-api-user:v1
+  - docker build ./udagram-frontend -t  exrelativity/udagram-frontend:v1
+  - docker build ./udagram-reverseproxy -t exrelativity/udagram-reverseproxy:v1
+
+script: 
+  - docker-composer up
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push exrelativity/udagram-api-feed:v1
+  - docker push exrelativity/udagram-api-user:v1
+  - docker push exrelativity/udagram-frontend:v1
+  - docker push exrelativity/udagram-reverseproxy:v1
